@@ -8,7 +8,8 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES"/>
 
-    <application>
+    <application
+        android:name=".App">
         <service android:name="com.luxiaochun.appupdateutils.downloadService.DownloadService"/>
         <provider
             android:name="com.luxiaochun.appupdateutils.AppUpdateFileProvider"
