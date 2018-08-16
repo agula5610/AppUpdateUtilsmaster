@@ -73,7 +73,7 @@
                 android:textSize="14sp"
                 android:visibility="gone" />
 
-            <com.example.jun.jiuzhou.AppUpdateUtil.view.NumberProgressBar
+            <com.luxiaochun.appupdateutils.view.NumberProgressBar
                 android:id="@+id/npb"
                 style="@style/UpdateAppNumberProgressBar_Red"
                 android:paddingBottom="10dp"

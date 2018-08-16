@@ -17,7 +17,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        normal = findViewById(R.id.never);
+        normal = findViewById(R.id.normal);
         silence = findViewById(R.id.silence);
         force = findViewById(R.id.force);
         normal.setOnClickListener(new View.OnClickListener() {
@@ -33,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
                         .setHttpManager(new OkGoUpdateHttpUtil())
                         .setNewVersion("1.0")
                         .build()
-                        .forceUpdate();
+                        .update();
             }
         });
         silence.setOnClickListener(new View.OnClickListener() {
@@ -49,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
                         .setHttpManager(new OkGoUpdateHttpUtil())
                         .setNewVersion("1.0")
                         .build()
-                        .forceUpdate();
+                        .silenceUpdate();
             }
         });
         force.setOnClickListener(new View.OnClickListener() {
