@@ -54,12 +54,18 @@ public class DownloadService extends Service {
     }
 
     public class DownloadBinder extends Binder {
+        /**
+         * 开始下载
+         * @param updateApp
+         * @param callback
+         */
         public void start(AppUpdateBean updateApp, DownloadCallback callback) {
             //apk所在地址：指定地址+版本号+apkName
             httpManager = new OkGoUpdateHttpUtil();
             String target = updateApp.getApkDownloadPath() + File.separator + updateApp.getNewVersion();
             httpManager.download(updateApp.getApkDownloadUrl(), target, new DownloadService.FileDownloadCallBack(updateApp, callback));
         }
+
         /**
          * 暂停下载
          */
@@ -80,11 +86,20 @@ public class DownloadService extends Service {
             }
         }
 
+        /**
+         * 取消下载
+         * @param url
+         */
         public void cancel(String url){
             if (httpManager != null) {
                 httpManager.remove(url);
             }
         }
+
+        /**
+         * 停止后台服务
+         * @param conn
+         */
         public void stop(ServiceConnection conn) {
             if (httpManager != null) {
                 httpManager = null;
@@ -93,6 +108,10 @@ public class DownloadService extends Service {
             getApplicationContext().unbindService(conn);
         }
 
+        /**
+         * 判断是否是暂停状态
+         * @return
+         */
         public boolean isPaused(){
             return isPaused;
         }
