@@ -6,7 +6,6 @@ import android.view.View;
 import android.widget.Button;
 
 import com.luxiaochun.appupdateutils.AppUpdateManager;
-import com.luxiaochun.appupdateutils.http.OkGoUpdateHttpUtil;
 
 public class MainActivity extends AppCompatActivity {
     Button normal;
@@ -30,7 +29,6 @@ public class MainActivity extends AppCompatActivity {
                         //更新地址
                         .setUpdateUrl("http://gdown.baidu.com/data/wisegame/e8235a956b670f0e/baiduwangpan_610.apk")
                         //实现httpManager接口的对象
-                        .setHttpManager(new OkGoUpdateHttpUtil())
                         .setNewVersion("1.0")
                         .build()
                         .update();
@@ -46,7 +44,6 @@ public class MainActivity extends AppCompatActivity {
                         //更新地址
                         .setUpdateUrl("http://gdown.baidu.com/data/wisegame/e8235a956b670f0e/baiduwangpan_610.apk")
                         //实现httpManager接口的对象
-                        .setHttpManager(new OkGoUpdateHttpUtil())
                         .setNewVersion("1.0")
                         .build()
                         .silenceUpdate();
@@ -62,7 +59,6 @@ public class MainActivity extends AppCompatActivity {
                         //更新地址
                         .setUpdateUrl("http://gdown.baidu.com/data/wisegame/e8235a956b670f0e/baiduwangpan_610.apk")
                         //实现httpManager接口的对象
-                        .setHttpManager(new OkGoUpdateHttpUtil())
                         .setNewVersion("1.0")
                         .build()
                         .forceUpdate();

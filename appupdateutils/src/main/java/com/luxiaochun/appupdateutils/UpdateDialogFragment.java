@@ -51,7 +51,7 @@ public class UpdateDialogFragment extends DialogFragment implements View.OnClick
     private LinearLayout mLoadingLL;
     private Button mCancelBtn;
     private Button mPauseContinueBtn;
-    private boolean isPaused = false;
+
     /**
      * 回调
      */
@@ -286,10 +286,12 @@ public class UpdateDialogFragment extends DialogFragment implements View.OnClick
             cancelDownloadService();
             dismiss();
         } else if (i == R.id.btn_pause_continue) {
-            if (isPaused) {
-                continueDownload();
-            } else {
-                pauseDownload();
+            if (mDownloadBinder != null) {
+                if (mDownloadBinder.isPaused()) {
+                    continueDownload();
+                } else {
+                   pauseDownload();
+                }
             }
         } else if (i == R.id.iv_close) {
             dismiss();
@@ -297,7 +299,6 @@ public class UpdateDialogFragment extends DialogFragment implements View.OnClick
             AppUpdateUtils.saveIgnoreVersion(getActivity(), mAppBean.getNewVersion());
             dismiss();
         }
-
     }
 
     /**
@@ -373,30 +374,35 @@ public class UpdateDialogFragment extends DialogFragment implements View.OnClick
     /**
      * 暂停下载
      */
-    public void pauseDownload() {
-        if (mDownloadBinder != null && mAppBean != null) {
-            isPaused = true;
-            mAppBean.getmHttpManager().pause(mAppBean.getApkDownloadUrl());
+    private void pauseDownload() {
+        if (mDownloadBinder != null) {
+            mPauseContinueBtn.setText("继续");
+            mDownloadBinder.pause(mAppBean.getApkDownloadUrl());
         }
     }
 
     /**
      * 继续下载
      */
-    public void continueDownload() {
-        if (mDownloadBinder != null && mAppBean != null) {
-            isPaused = false;
-            mAppBean.getmHttpManager().continueDownload(mAppBean.getApkDownloadUrl());
+    private void continueDownload() {
+        if (mDownloadBinder != null) {
+            mPauseContinueBtn.setText("暂停");
+            mDownloadBinder.continued(mAppBean.getApkDownloadUrl());
         }
     }
 
     /**
      * 取消下载
      */
-    public void cancelDownload() {
-        mAppBean.getmHttpManager().remove(mAppBean.getApkDownloadUrl());
+    private void cancelDownload() {
+        if (mDownloadBinder != null) {
+            mDownloadBinder.cancel(mAppBean.getApkDownloadUrl());
+        }
     }
 
+    /**
+     * 停止后台运行的服务进程
+     */
     public void cancelDownloadService() {
         if (mDownloadBinder != null) {
             mDownloadBinder.stop(conn);
@@ -445,7 +451,6 @@ public class UpdateDialogFragment extends DialogFragment implements View.OnClick
         }
 
     }
-
 
     private void showInstallBtn(final File file) {
         mNumberProgressBar.setVisibility(View.GONE);

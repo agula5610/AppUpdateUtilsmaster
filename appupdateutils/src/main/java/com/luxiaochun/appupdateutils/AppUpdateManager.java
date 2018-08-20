@@ -19,33 +19,30 @@ import java.io.File;
  */
 public class AppUpdateManager {
     public static final String TAG = AppUpdateManager.class.getSimpleName();
-    public static final long REFRESH_TIME = 150;
+    public static final long REFRESH_TIME = 150;  //毫秒
     /**
-     * 三个必填项
+     * 两个必填项
      */
     private Activity mActivity;
-    private HttpManager mHttpManager;
     private String apkDownloadUrl;
     /**
      * 选填项,均有默认值
      */
-    private String newVersion;
-    private String apkUpdateLog;
-    private String dialogTitle;
-    private int mThemeColor;
+    private String newVersion;//新版本
+    private String apkUpdateLog;//apk更新说明
+    private String dialogTitle;//dialog标题
+    private int mThemeColor;//主题颜色
     @DrawableRes
-    private int mTopPic;
-    private String apkDownloadPath;
-    private long refreshTime;
+    private int mTopPic;//顶部图片
+    private String apkDownloadPath;//apk下载路径
+    private long refreshTime;//刷新时间
 
-    private boolean mOnlyWifi;
-    private boolean mSilence;
-    private boolean mForce;
-    //自定义参数
+    private boolean mOnlyWifi;//仅wifi下载
+    private boolean mSilence;//静默下载
+    private boolean mForce;//强制更新
 
     private AppUpdateManager(Builder builder) {
         mActivity = builder.getActivity();
-        mHttpManager = builder.getHttpManager();
         apkDownloadUrl = builder.getUpdateUrl();
 
         newVersion = builder.getNewVersion();
@@ -61,15 +58,6 @@ public class AppUpdateManager {
 
     public Context getContext() {
         return mActivity;
-    }
-
-    /**
-     * 暂时留用
-     *
-     * @return
-     */
-    private boolean verify() {
-        return true;
     }
 
     /**
@@ -100,9 +88,6 @@ public class AppUpdateManager {
      * 跳转到更新页面
      */
     private void showDialogFragment() {
-        //校验
-        if (!verify()) return;
-
         if (mActivity != null && !mActivity.isFinishing()) {
             Bundle bundle = new Bundle();
             //添加信息，
@@ -123,7 +108,6 @@ public class AppUpdateManager {
                 });
             }
             fragment.show(((FragmentActivity) mActivity).getSupportFragmentManager(), "dialog");
-
         }
     }
 
@@ -132,7 +116,6 @@ public class AppUpdateManager {
      */
     private AppUpdateBean fillAppBean() {
         AppUpdateBean bean = new AppUpdateBean();
-        bean.setmHttpManager(mHttpManager);
         bean.setApkDownloadUrl(apkDownloadUrl);
 
         bean.setNewVersion(newVersion);
@@ -151,7 +134,6 @@ public class AppUpdateManager {
     public static class Builder {
         //必填
         private Activity mActivity;
-        private HttpManager mHttpManager;
         private String mUpdateUrl;
 
         private String newVersion;
@@ -202,21 +184,6 @@ public class AppUpdateManager {
          */
         public Builder setActivity(Activity activity) {
             mActivity = activity;
-            return this;
-        }
-
-        public HttpManager getHttpManager() {
-            return mHttpManager;
-        }
-
-        /**
-         * 设置网络工具
-         *
-         * @param httpManager 自己实现的网络对象
-         * @return Builder
-         */
-        public Builder setHttpManager(HttpManager httpManager) {
-            mHttpManager = httpManager;
             return this;
         }
 
@@ -297,7 +264,7 @@ public class AppUpdateManager {
          */
         public AppUpdateManager build() {
             //校验
-            if (getActivity() == null || getHttpManager() == null || TextUtils.isEmpty(getUpdateUrl())) {
+            if (getActivity() == null || TextUtils.isEmpty(getUpdateUrl())) {
                 throw new NullPointerException("必要参数不能为空");
             }
             if (TextUtils.isEmpty(getApkDownloadPath())) {

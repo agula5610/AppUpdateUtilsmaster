@@ -16,7 +16,6 @@ import java.io.File;
  * PackageName: com.example.jun.jiuzhou.AppUpdateUtil
  * Author: jun
  * Date: 2018-08-08 11:45
- * Copyright: (C)HESC Co.,Ltd. 2016. All rights reserved.
  */
 public class SilenceNotificationManager {
     private static volatile SilenceNotificationManager instance;

@@ -9,7 +9,6 @@ import java.io.Serializable;
  * PackageName: com.example.jun.jiuzhou.AppUpdateUtil
  * Author: jun
  * Date: 2018-08-02 15:48
- * Copyright: (C)HESC Co.,Ltd. 2016. All rights reserved.
  */
 public class AppUpdateBean implements Serializable {
     //新版本号
@@ -34,7 +33,6 @@ public class AppUpdateBean implements Serializable {
 
     private boolean mOnlyWifi;
 
-    private HttpManager mHttpManager;
 
     private long lastRefreshTime;
 
@@ -54,14 +52,6 @@ public class AppUpdateBean implements Serializable {
 
     public void setLastRefreshTime(long lastRefreshTime) {
         this.lastRefreshTime = lastRefreshTime;
-    }
-
-    public HttpManager getmHttpManager() {
-        return mHttpManager;
-    }
-
-    public void setmHttpManager(HttpManager mHttpManager) {
-        this.mHttpManager = mHttpManager;
     }
 
     public boolean isSilence() {

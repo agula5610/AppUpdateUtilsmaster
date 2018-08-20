@@ -12,6 +12,7 @@ import android.widget.Toast;
 
 import com.luxiaochun.appupdateutils.AppUpdateBean;
 import com.luxiaochun.appupdateutils.HttpManager;
+import com.luxiaochun.appupdateutils.http.OkGoUpdateHttpUtil;
 
 import java.io.File;
 
@@ -22,6 +23,8 @@ public class DownloadService extends Service {
     private static final String TAG = DownloadService.class.getSimpleName();
     private SilenceNotificationManager silenceNotificationManager;
     private DownloadBinder binder = new DownloadBinder();
+    private HttpManager httpManager;
+    private boolean isPaused = false;
 
     public static void bindService(Context context, ServiceConnection connection) {
         Intent intent = new Intent(context, DownloadService.class);
@@ -53,13 +56,45 @@ public class DownloadService extends Service {
     public class DownloadBinder extends Binder {
         public void start(AppUpdateBean updateApp, DownloadCallback callback) {
             //apk所在地址：指定地址+版本号+apkName
+            httpManager = new OkGoUpdateHttpUtil();
             String target = updateApp.getApkDownloadPath() + File.separator + updateApp.getNewVersion();
-            updateApp.getmHttpManager().download(updateApp.getApkDownloadUrl(), target, new DownloadService.FileDownloadCallBack(updateApp, callback));
+            httpManager.download(updateApp.getApkDownloadUrl(), target, new DownloadService.FileDownloadCallBack(updateApp, callback));
+        }
+        /**
+         * 暂停下载
+         */
+        public void pause(String url) {
+            if (httpManager != null) {
+                isPaused = true;
+                httpManager.pause(url);
+            }
         }
 
+        /**
+         * 继续下载
+         */
+        public void continued(String url) {
+            if (httpManager != null) {
+                isPaused = false;
+                httpManager.continueDownload(url);
+            }
+        }
+
+        public void cancel(String url){
+            if (httpManager != null) {
+                httpManager.remove(url);
+            }
+        }
         public void stop(ServiceConnection conn) {
+            if (httpManager != null) {
+                httpManager = null;
+            }
             stopSelf();
             getApplicationContext().unbindService(conn);
+        }
+
+        public boolean isPaused(){
+            return isPaused;
         }
     }
 
