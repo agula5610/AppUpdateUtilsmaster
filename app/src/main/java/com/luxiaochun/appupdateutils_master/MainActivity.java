@@ -30,6 +30,8 @@ public class MainActivity extends AppCompatActivity {
                         .setUpdateUrl("http://gdown.baidu.com/data/wisegame/e8235a956b670f0e/baiduwangpan_610.apk")
                         //实现httpManager接口的对象
                         .setNewVersion("1.0")
+                        .setApkUpdateLog("人这一辈子，是有三次成长的。一是当你意识到这个世界上有些事并不会按照你的意愿来发展的时候，二是无论你怎么努力都会被怀疑嘲讽的时候，三是当你知道不会成功还会勇往直前的时候。")
+                        .setDialogTitle("App更新历险记")
                         .build()
                         .update();
             }

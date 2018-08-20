@@ -119,20 +119,12 @@ public class UpdateDialogFragment extends DialogFragment implements View.OnClick
                 return false;
             }
         });
-
-        Window dialogWindow = getDialog().getWindow();
-        dialogWindow.setGravity(Gravity.CENTER);
-        WindowManager.LayoutParams lp = dialogWindow.getAttributes();
-        DisplayMetrics displayMetrics = getContext().getResources().getDisplayMetrics();
-        lp.height = (int) (displayMetrics.heightPixels * 0.8f);
-        lp.width = (int) (displayMetrics.widthPixels * 0.8f);
-        dialogWindow.setAttributes(lp);
     }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.lib_update_app_dialog, null);
+        return inflater.inflate(R.layout.lib_update_app_dialog, container);
     }
 
     @Override
@@ -173,6 +165,13 @@ public class UpdateDialogFragment extends DialogFragment implements View.OnClick
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        Window dialogWindow = getDialog().getWindow();
+        dialogWindow.setGravity(Gravity.CENTER);
+        WindowManager.LayoutParams lp = dialogWindow.getAttributes();
+        DisplayMetrics displayMetrics = getContext().getResources().getDisplayMetrics();
+        lp.height = (int) (displayMetrics.heightPixels * 0.6f);
+        lp.width = (int) (displayMetrics.widthPixels * 0.76f);
+        dialogWindow.setAttributes(lp);
         initData();
     }
 
