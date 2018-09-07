@@ -18,7 +18,6 @@ import java.io.File;
  * Date: 2018-08-08 11:45
  */
 public class SilenceNotificationManager {
-    private static volatile SilenceNotificationManager instance;
     private final Context mContext;
     private NotificationManager mNotificationManager;
     private NotificationCompat.Builder mBuilder;
