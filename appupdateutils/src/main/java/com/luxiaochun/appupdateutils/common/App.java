@@ -1,4 +1,4 @@
-package com.luxiaochun.appupdateutils;
+package com.luxiaochun.appupdateutils.common;
 
 import android.app.Application;
 

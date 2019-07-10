@@ -10,8 +10,9 @@ import android.os.SystemClock;
 import android.support.annotation.Nullable;
 import android.widget.Toast;
 
-import com.luxiaochun.appupdateutils.AppUpdateBean;
-import com.luxiaochun.appupdateutils.HttpManager;
+import com.luxiaochun.appupdateutils.common.AppUpdateBean;
+import com.luxiaochun.appupdateutils.common.UpdateType;
+import com.luxiaochun.appupdateutils.http.HttpManager;
 import com.luxiaochun.appupdateutils.http.OkGoUpdateHttpUtil;
 
 import java.io.File;
@@ -62,8 +63,8 @@ public class DownloadService extends Service {
         public void start(AppUpdateBean updateApp, DownloadCallback callback) {
             //apk所在地址：指定地址+版本号+apkName
             httpManager = new OkGoUpdateHttpUtil();
-            String target = updateApp.getApkDownloadPath() + File.separator + updateApp.getNewVersion();
-            httpManager.download(updateApp.getApkDownloadUrl(), target, new DownloadService.FileDownloadCallBack(updateApp, callback));
+            String target = updateApp.getPath() + File.separator + updateApp.getVersion();
+            httpManager.download(updateApp.getUrl(), target, new DownloadService.FileDownloadCallBack(updateApp, callback));
         }
 
         /**
@@ -131,7 +132,7 @@ public class DownloadService extends Service {
         public void onBefore() {
             if (mCallBack != null) {
                 mCallBack.onStart();
-                if (updateApp.isSilence()) {
+                if (UpdateType.Slience == updateApp.getType()) {
                     silenceNotificationManager = SilenceNotificationManager.getIstance(DownloadService.this);
                     silenceNotificationManager.setUpNotification();
                 }
@@ -144,7 +145,7 @@ public class DownloadService extends Service {
             long lastTime = updateApp.getLastRefreshTime();
             if (updateApp.getRefreshTime() < SystemClock.elapsedRealtime() - lastTime) {
                 if (mCallBack != null) {
-                    if (updateApp.isSilence()) {
+                    if (UpdateType.Slience == updateApp.getType()) {
                         int rate = Math.round(progress * 100);
                         silenceNotificationManager.setProgress(rate);
                     } else {
@@ -159,7 +160,7 @@ public class DownloadService extends Service {
         public void onError(String error) {
             Toast.makeText(DownloadService.this, "更新新版本出错，" + error, Toast.LENGTH_SHORT).show();
             if (mCallBack != null) {
-                if (updateApp.isSilence()) {
+                if (UpdateType.Slience == updateApp.getType()) {
                     silenceNotificationManager.errorStop(error);
                 }
                 mCallBack.onError(error);
@@ -169,7 +170,7 @@ public class DownloadService extends Service {
         @Override
         public void onResponse(File file) {
             if (mCallBack != null) {
-                if (updateApp.isSilence()) {
+                if (UpdateType.Slience == updateApp.getType()) {
                     silenceNotificationManager.setProgressDone(file);
                 }
                 mCallBack.onFinish(file);

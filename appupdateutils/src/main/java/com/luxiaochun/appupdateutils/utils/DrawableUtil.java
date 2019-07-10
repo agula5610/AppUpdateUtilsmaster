@@ -192,7 +192,7 @@ public class DrawableUtil {
      * @param color        颜色
      */
     public static void setTextStrokeTheme(TextView textView, int strokeWidth, int cornerRadius, int color) {
-        textView.setBackgroundDrawable(getStrokeSolidDrawable(cornerRadius, strokeWidth, color, Color.WHITE));
+        textView.setBackground(getStrokeSolidDrawable(cornerRadius, strokeWidth, color, Color.WHITE));
         textView.setTextColor(getColorStateList(Color.WHITE, color));
         textView.getPaint().setFlags(Paint.FAKE_BOLD_TEXT_FLAG);
     }

@@ -1,4 +1,4 @@
-package com.luxiaochun.appupdateutils;
+package com.luxiaochun.appupdateutils.http;
 
 import android.support.annotation.NonNull;
 

@@ -9,10 +9,10 @@
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES"/>
 
     <application
-        android:name=".App">
+        android:name=".common.App">
         <service android:name="com.luxiaochun.appupdateutils.downloadService.DownloadService"/>
         <provider
-            android:name="com.luxiaochun.appupdateutils.AppUpdateFileProvider"
+            android:name="com.luxiaochun.appupdateutils.common.AppUpdateFileProvider"
             android:authorities="${applicationId}.fileProvider"
             android:exported="false"
             android:grantUriPermissions="true">

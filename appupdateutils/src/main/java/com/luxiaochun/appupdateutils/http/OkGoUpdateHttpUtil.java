@@ -2,7 +2,6 @@ package com.luxiaochun.appupdateutils.http;
 
 import android.support.annotation.NonNull;
 
-import com.luxiaochun.appupdateutils.HttpManager;
 import com.lzy.okgo.OkGo;
 import com.lzy.okgo.model.Progress;
 import com.lzy.okgo.request.GetRequest;
@@ -27,9 +26,9 @@ public class OkGoUpdateHttpUtil implements HttpManager {
         OkDownload.getInstance().setFolder(path);
         GetRequest<File> request = OkGo.<File>get(url);
         //这里第一个参数是tag，代表下载任务的唯一标识，传任意字符串都行，需要保证唯一,我这里用url作为了tag\
-        OkDownload.request(url, request)//
-                .save()//
-                .register(new mDownLoadListener(url,callback))//
+        OkDownload.request(url, request)
+                .save()
+                .register(new mDownLoadListener(url,callback))
                 .start();
     }
 

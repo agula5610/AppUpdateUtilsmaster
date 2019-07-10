@@ -1,6 +1,5 @@
 package com.luxiaochun.appupdateutils;
 
-import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Environment;
@@ -8,6 +7,8 @@ import android.support.annotation.DrawableRes;
 import android.support.v4.app.FragmentActivity;
 import android.text.TextUtils;
 
+import com.luxiaochun.appupdateutils.common.AppUpdateBean;
+import com.luxiaochun.appupdateutils.common.UpdateType;
 import com.luxiaochun.appupdateutils.downloadService.SilenceUpdateCallback;
 import com.luxiaochun.appupdateutils.utils.AppUpdateUtils;
 
@@ -19,136 +20,83 @@ import java.io.File;
  */
 public class AppUpdateManager {
     public static final String TAG = AppUpdateManager.class.getSimpleName();
-    public static final long REFRESH_TIME = 150;  //毫秒
-    /**
-     * 两个必填项
-     */
-    private Activity mActivity;
-    private String apkDownloadUrl;
-    /**
-     * 选填项,均有默认值
-     */
-    private String newVersion;//新版本
-    private String apkUpdateLog;//apk更新说明
-    private String dialogTitle;//dialog标题
-    private int mThemeColor;//主题颜色
-    @DrawableRes
-    private int mTopPic;//顶部图片
-    private String apkDownloadPath;//apk下载路径
-    private long refreshTime;//刷新时间
+    private static final long REFRESH_TIME = 150;  //毫秒
 
-    private boolean mOnlyWifi;//仅wifi下载
-    private boolean mSilence;//静默下载
-    private boolean mForce;//强制更新
+    private Context mContext;
+    private AppUpdateBean bean;
+
 
     private AppUpdateManager(Builder builder) {
-        mActivity = builder.getActivity();
-        apkDownloadUrl = builder.getUpdateUrl();
+        bean = new AppUpdateBean();
 
-        newVersion = builder.getNewVersion();
-        apkUpdateLog = builder.getApkUpdateLog();
-        dialogTitle = builder.getDialogTitle();
-        mThemeColor = builder.getThemeColor();
-        mTopPic = builder.getTopPic();
-        apkDownloadPath = builder.getApkDownloadPath();
-        refreshTime = builder.getRefreshTime();
+        bean.setUrl(builder.getUrl());
 
-        mOnlyWifi = builder.isOnlyWifi();
+        bean.setType(builder.getType());
+        bean.setPath(builder.getPath());
+
+        bean.setVersion(builder.getVersion());
+        bean.setNotes(builder.getNotes());
+        bean.setTitle(builder.getTitle());
+        bean.setThemeColor(builder.getThemeColor());
+        bean.setTopPic(builder.getTopPic());
+
+        bean.setWifi(builder.isWifi());
+
+        mContext = builder.getContext();
     }
 
-    public Context getContext() {
-        return mActivity;
-    }
-
-    /**
-     * 最简方式
-     */
 
     public void update() {
-        showDialogFragment();
-    }
-
-    /**
-     * 静默更新
-     */
-    public void silenceUpdate() {
-        mSilence = true;
-        update();
-    }
-
-    /**
-     * 强制更新
-     */
-    public void forceUpdate() {
-        mForce = true;
-        update();
-    }
-
-    /**
-     * 跳转到更新页面
-     */
-    private void showDialogFragment() {
-        if (mActivity != null && !mActivity.isFinishing()) {
-            Bundle bundle = new Bundle();
-            //添加信息，
-            AppUpdateBean bean = fillAppBean();
-            bundle.putSerializable(TAG, bean);
-            UpdateDialogFragment fragment = UpdateDialogFragment
-                    .newInstance(bundle);
-            if (bean.isSilence()) {
-                fragment.setSilenceUpdateCallback(new SilenceUpdateCallback() {
-                    @Override
-                    public void onDownloadFinish(File file) {
-                        if (mActivity != null) {
-                            if (AppUpdateUtils.isAppOnForeground(mActivity)) {
-                                AppUpdateUtils.installApp(mActivity,file);
-                            }
+        Bundle bundle = new Bundle();
+        bundle.putSerializable(TAG, bean);
+        RocketFragment fragment = RocketFragment
+                .newInstance(bundle);
+        if (UpdateType.Slience == bean.getType()) {
+            fragment.setSilenceUpdateCallback(new SilenceUpdateCallback() {
+                @Override
+                public void onDownloadFinish(File file) {
+                    if (mContext != null) {
+                        if (AppUpdateUtils.isAppOnForeground(mContext)) {
+                            AppUpdateUtils.installApp(mContext, file);
                         }
                     }
-                });
-            }
-            fragment.show(((FragmentActivity) mActivity).getSupportFragmentManager(), "dialog");
+                }
+            });
         }
-    }
-
-    /**
-     * @return 新版本信息
-     */
-    private AppUpdateBean fillAppBean() {
-        AppUpdateBean bean = new AppUpdateBean();
-        bean.setApkDownloadUrl(apkDownloadUrl);
-
-        bean.setNewVersion(newVersion);
-        bean.setApkUpdateLog(apkUpdateLog);
-        bean.setDialogTitle(dialogTitle);
-        bean.setDialogThemeColor(mThemeColor);
-        bean.setDialogTopPic(mTopPic);
-        bean.setApkDownloadPath(apkDownloadPath);
-
-        bean.setmOnlyWifi(mOnlyWifi);
-        bean.setConstraint(mForce);
-        bean.setSilence(mSilence);
-        return bean;
+        fragment.show(((FragmentActivity) mContext).getSupportFragmentManager(), "");
     }
 
     public static class Builder {
-        //必填
-        private Activity mActivity;
-        private String mUpdateUrl;
-
-        private String newVersion;
-        private String apkUpdateLog;
-        private String dialogTitle;
-        private int mThemeColor = -1;
+        // 必填
+        private Context context;
+        // 下载地址
+        private String url;
+        // 新版本
+        private String version;
+        // 更新说明
+        private String notes;
+        // 标题
+        private String title;
+        // 主题颜色,按钮，进度条的颜色
+        private int themeColor = -1;
+        // 头部图片
         @DrawableRes
-        private int mTopPic = -1;
-        private String apkDownloadPath;
+        private int topPic = -1;
+        // 下载地址
+        private String path;
         private long refreshTime = REFRESH_TIME;
 
-        private boolean mOnlyWifi;
+        private boolean wifi;
 
-        public long getRefreshTime() {
-            return refreshTime;
+        private UpdateType type;
+
+        /**
+         * @param type 更新模式
+         * @return Builder
+         */
+        public Builder setType(UpdateType type) {
+            this.type = type;
+            return this;
         }
 
         public Builder setRefreshTime(long refreshTime) {
@@ -156,107 +104,94 @@ public class AppUpdateManager {
             return this;
         }
 
-        public String getApkDownloadPath() {
-            return apkDownloadPath;
+        public Builder setPath(String path) {
+            this.path = path;
+            return this;
         }
 
-        /**
-         * apk的下载路径，
-         *
-         * @param targetPath apk的下载路径，
-         * @return Builder
-         */
-        public Builder setApkDownloadPath(String targetPath) {
-            apkDownloadPath = targetPath;
+        public Builder setContext(Context context) {
+            this.context = context;
+            return this;
+        }
+
+        public Builder setUrl(String url) {
+            this.url = url;
+            return this;
+        }
+
+        public Builder setVersion(String version) {
+            this.version = version;
+            return this;
+        }
+
+        public Builder setNotes(String notes) {
+            this.notes = notes;
+            return this;
+        }
+
+        public Builder setTitle(String title) {
+            this.title = title;
+            return this;
+        }
+
+        public Builder setThemeColor(int color) {
+            themeColor = color;
+            return this;
+        }
+
+        public Builder setTopPic(int topPic) {
+            this.topPic = topPic;
+            return this;
+        }
+
+        public Builder setWifi() {
+            wifi = true;
             return this;
         }
 
 
-        public Activity getActivity() {
-            return mActivity;
+        public Context getContext() {
+            return context;
         }
 
-        /**
-         * 是否是post请求，默认是get
-         *
-         * @param activity 当前提示的Activity
-         * @return Builder
-         */
-        public Builder setActivity(Activity activity) {
-            mActivity = activity;
-            return this;
+        public String getUrl() {
+            return url;
         }
 
-        public String getUpdateUrl() {
-            return mUpdateUrl;
+        public String getVersion() {
+            return version;
         }
 
-        /**
-         * 更新地址
-         *
-         * @param updateUrl 更新地址
-         * @return Builder
-         */
-        public Builder setUpdateUrl(String updateUrl) {
-            mUpdateUrl = updateUrl;
-            return this;
+        public String getNotes() {
+            return notes;
         }
 
-        public String getNewVersion() {
-            return newVersion;
-        }
-
-        public Builder setNewVersion(String newVersion) {
-            this.newVersion = newVersion;
-            return this;
-        }
-
-        public String getApkUpdateLog() {
-            return apkUpdateLog;
-        }
-
-        public Builder setApkUpdateLog(String apkUpdateLog) {
-            this.apkUpdateLog = apkUpdateLog;
-            return this;
-        }
-
-        public String getDialogTitle() {
-            return dialogTitle;
-        }
-
-        public Builder setDialogTitle(String dialogTitle) {
-            this.dialogTitle = dialogTitle;
-            return this;
+        public String getTitle() {
+            return title;
         }
 
         public int getThemeColor() {
-            return mThemeColor;
-        }
-
-        /**
-         * 设置按钮，进度条的颜色
-         *
-         * @param themeColor 设置按钮，进度条的颜色
-         * @return Builder
-         */
-        public Builder setThemeColor(int themeColor) {
-            mThemeColor = themeColor;
-            return this;
+            return themeColor;
         }
 
         public int getTopPic() {
-            return mTopPic;
+            return topPic;
         }
 
-        /**
-         * 顶部的图片
-         *
-         * @param topPic 顶部的图片
-         * @return Builder
-         */
-        public Builder setTopPic(int topPic) {
-            mTopPic = topPic;
-            return this;
+        public String getPath() {
+            return path;
+        }
+
+        public long getRefreshTime() {
+            return refreshTime;
+        }
+
+        public boolean isWifi() {
+            return wifi;
+        }
+
+        public UpdateType getType() {
+            return type;
         }
 
         /**
@@ -264,15 +199,15 @@ public class AppUpdateManager {
          */
         public AppUpdateManager build() {
             //校验
-            if (getActivity() == null || TextUtils.isEmpty(getUpdateUrl())) {
+            if (null == context) {
                 throw new NullPointerException("必要参数不能为空");
             }
-            if (TextUtils.isEmpty(getApkDownloadPath())) {
+            if (TextUtils.isEmpty(path)) {
                 //sd卡是否存在
                 String path = "";
-                if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED) || !Environment.isExternalStorageRemovable()) {
+                if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
                     try {
-                        path = getActivity().getExternalCacheDir().getAbsolutePath();
+                        path = context.getExternalCacheDir().getAbsolutePath();
                     } catch (NullPointerException e) {
                         e.printStackTrace();
                     }
@@ -280,23 +215,12 @@ public class AppUpdateManager {
                         path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath();
                     }
                 } else {
-                    path = getActivity().getCacheDir().getAbsolutePath();
+                    path = context.getCacheDir().getAbsolutePath();
                 }
-                setApkDownloadPath(path);
+                setPath(path);
             }
             return new AppUpdateManager(this);
         }
-
-
-        public Builder setOnlyWifi() {
-            mOnlyWifi = true;
-            return this;
-        }
-
-        public boolean isOnlyWifi() {
-            return mOnlyWifi;
-        }
-
     }
 
 }

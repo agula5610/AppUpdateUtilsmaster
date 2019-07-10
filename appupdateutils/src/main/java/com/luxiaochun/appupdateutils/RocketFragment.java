@@ -27,6 +27,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.luxiaochun.appupdateutils.common.AppUpdateBean;
+import com.luxiaochun.appupdateutils.common.UpdateType;
 import com.luxiaochun.appupdateutils.downloadService.DownloadCallback;
 import com.luxiaochun.appupdateutils.downloadService.DownloadService;
 import com.luxiaochun.appupdateutils.downloadService.SilenceUpdateCallback;
@@ -38,19 +40,30 @@ import com.luxiaochun.appupdateutils.view.NumberProgressBar;
 import java.io.File;
 import java.util.Objects;
 
-public class UpdateDialogFragment extends DialogFragment implements View.OnClickListener {
+public class RocketFragment extends DialogFragment implements View.OnClickListener {
     public static final String TIPS = "请授权访问存储空间权限，否则App无法更新";
 
     private AppUpdateBean mAppBean;
 
-    private TextView mContentTextView;
+    private TextView mContentTv;
     private Button mUpdateOkButton;
-    private NumberProgressBar mNumberProgressBar;
-    private ImageView mIvClose;
-    private TextView mTitleTextView;
+    private NumberProgressBar mNumberPb;
+    private ImageView mCloseIv;
+    private TextView mTitleTv;
     private LinearLayout mLoadingLL;
     private Button mCancelBtn;
     private Button mPauseContinueBtn;
+    private LinearLayout mLlClose;
+    private ImageView mTopIv;
+    private TextView mIgnore;
+
+    //默认色
+    private int mDefaultColor = 0xffe94339;
+    private int mDefaultPicResId = R.drawable.lib_update_app_top_bg;
+
+    private long apkTotalSize = 0;
+    private DownloadService.DownloadBinder mDownloadBinder;
+    private SilenceUpdateCallback silenceUpdateCallback;
 
     /**
      * 回调
@@ -67,30 +80,56 @@ public class UpdateDialogFragment extends DialogFragment implements View.OnClick
         }
     };
 
-    private LinearLayout mLlClose;
-    //默认色
-    private int mDefaultColor = 0xffe94339;
-    private int mDefaultPicResId = R.drawable.lib_update_app_top_bg;
-    private ImageView mTopIv;
-    private TextView mIgnore;
-    private long apkTotalSize = 0;
-    private DownloadService.DownloadBinder mDownloadBinder;
-    private SilenceUpdateCallback silenceUpdateCallback;
-
-    public static UpdateDialogFragment newInstance(Bundle args) {
-        UpdateDialogFragment fragment = new UpdateDialogFragment();
+    public static RocketFragment newInstance(Bundle args) {
+        RocketFragment fragment = new RocketFragment();
         if (args != null) {
             fragment.setArguments(args);
         }
         return fragment;
     }
 
-
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 //        setStyle(DialogFragment.STYLE_NO_TITLE | DialogFragment.STYLE_NO_FRAME, 0);
         setStyle(DialogFragment.STYLE_NO_TITLE, R.style.AppUpdateDialog);
+    }
+
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.lib_update_app_dialog, container);
+    }
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        initView(view);
+    }
+
+    private void initView(View view) {
+        //提示内容
+        mContentTv = view.findViewById(R.id.tv_update_info);
+        //标题
+        mTitleTv = view.findViewById(R.id.tv_title);
+        //更新按钮
+        mUpdateOkButton = view.findViewById(R.id.btn_ok);
+        //进度条
+        mNumberPb = view.findViewById(R.id.npb);
+        //取消和暂停按钮布局
+        mLoadingLL = view.findViewById(R.id.ll_loading);
+        //取消下载
+        mCancelBtn = view.findViewById(R.id.btn_cancel);
+        //暂停、继续下载
+        mPauseContinueBtn = view.findViewById(R.id.btn_pause_continue);
+        //关闭按钮
+        mCloseIv = view.findViewById(R.id.iv_close);
+        //关闭按钮+线 的整个布局
+        mLlClose = view.findViewById(R.id.ll_close);
+        //顶部图片
+        mTopIv = view.findViewById(R.id.iv_top);
+        //忽略
+        mIgnore = view.findViewById(R.id.tv_ignore);
     }
 
     @Override
@@ -107,8 +146,7 @@ public class UpdateDialogFragment extends DialogFragment implements View.OnClick
             @Override
             public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
                 if (keyCode == KeyEvent.KEYCODE_BACK) {
-                    //禁用
-                    if (mAppBean != null && mAppBean.isConstraint()) {
+                    if (mAppBean != null && UpdateType.Force == mAppBean.getType()) {
                         //返回桌面
                         startActivity(new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME));
                         return true;
@@ -121,45 +159,8 @@ public class UpdateDialogFragment extends DialogFragment implements View.OnClick
         });
     }
 
-    @Nullable
-    @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.lib_update_app_dialog, container);
-    }
-
-    @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        initView(view);
-    }
-
     public void setSilenceUpdateCallback(SilenceUpdateCallback silenceUpdateCallback) {
         this.silenceUpdateCallback = silenceUpdateCallback;
-    }
-
-    private void initView(View view) {
-        //提示内容
-        mContentTextView = view.findViewById(R.id.tv_update_info);
-        //标题
-        mTitleTextView = view.findViewById(R.id.tv_title);
-        //更新按钮
-        mUpdateOkButton = view.findViewById(R.id.btn_ok);
-        //进度条
-        mNumberProgressBar = view.findViewById(R.id.npb);
-        //取消和暂停按钮布局
-        mLoadingLL = view.findViewById(R.id.ll_loading);
-        //取消下载
-        mCancelBtn = view.findViewById(R.id.btn_cancel);
-        //暂停、继续下载
-        mPauseContinueBtn = view.findViewById(R.id.btn_pause_continue);
-        //关闭按钮
-        mIvClose = view.findViewById(R.id.iv_close);
-        //关闭按钮+线 的整个布局
-        mLlClose = view.findViewById(R.id.ll_close);
-        //顶部图片
-        mTopIv = view.findViewById(R.id.iv_top);
-        //忽略
-        mIgnore = view.findViewById(R.id.tv_ignore);
     }
 
     @Override
@@ -181,31 +182,36 @@ public class UpdateDialogFragment extends DialogFragment implements View.OnClick
         initTheme();
         if (mAppBean != null) {
             //弹出对话框
-            final String dialogTitle = mAppBean.getDialogTitle();
-            final String newVersion = mAppBean.getNewVersion();
-            final String targetSize = mAppBean.getApkSize();
-            final String updateLog = mAppBean.getApkUpdateLog();
+            final String title = mAppBean.getTitle();
+            final String version = mAppBean.getVersion();
+            final String apkSize = mAppBean.getApkSize();
+            final String notes = mAppBean.getNotes();
 
             String msg = "";
 
-            if (!TextUtils.isEmpty(targetSize)) {
-                msg = "新版本大小：" + targetSize + "\n\n";
+            if (!TextUtils.isEmpty(apkSize)) {
+                msg = "新版本大小：" + apkSize + "\n\n";
             }
 
-            if (!TextUtils.isEmpty(updateLog)) {
-                msg += updateLog;
+            if (!TextUtils.isEmpty(notes)) {
+                msg += notes;
             }
 
             //更新内容
-            mContentTextView.setText(msg);
+            mContentTv.setText(msg);
             //标题
-            mTitleTextView.setText(TextUtils.isEmpty(dialogTitle) ? String.format("是否升级到%s版本？", newVersion) : dialogTitle);
+            mTitleTv.setText(TextUtils.isEmpty(title) ? String.format("是否升级到%s版本？", version) : title);
             //强制更新
-            if (mAppBean.isConstraint()) {
+            if (UpdateType.Force == mAppBean.getType()) {
                 mLlClose.setVisibility(View.GONE);
+                mCancelBtn.setVisibility(View.GONE);
             }
 
-            if (AppUpdateUtils.appIsDownloaded(Objects.requireNonNull(this.getActivity()), mAppBean)) {   //已下载完成
+            if (UpdateType.Hint == mAppBean.getType()) {
+                mUpdateOkButton.setVisibility(View.GONE);
+            }
+            // 判断是否已下载
+            if (AppUpdateUtils.appIsDownloaded(Objects.requireNonNull(this.getActivity()), mAppBean)) {
                 showInstallBtn(AppUpdateUtils.getAppFile(mAppBean));
             }
 
@@ -217,8 +223,8 @@ public class UpdateDialogFragment extends DialogFragment implements View.OnClick
      * 初始化主题色
      */
     private void initTheme() {
-        final int color = mAppBean.getDialogThemeColor();
-        final int topResId = mAppBean.getDialogTopPic();
+        final int color = mAppBean.getThemeColor();
+        final int topResId = mAppBean.getTopPic();
 
         if (-1 == topResId) {
             if (-1 == color) {
@@ -244,11 +250,11 @@ public class UpdateDialogFragment extends DialogFragment implements View.OnClick
      */
     private void setDialogTheme(int color, int topResId) {
         mTopIv.setImageResource(topResId);
-        mUpdateOkButton.setBackgroundDrawable(DrawableUtil.getDrawable(AppUpdateUtils.dip2px(4, getActivity()), color));
-        mCancelBtn.setBackgroundDrawable(DrawableUtil.getDrawable(AppUpdateUtils.dip2px(4, getActivity()), color));
-        mPauseContinueBtn.setBackgroundDrawable(DrawableUtil.getDrawable(AppUpdateUtils.dip2px(4, getActivity()), color));
-        mNumberProgressBar.setProgressTextColor(color);
-        mNumberProgressBar.setReachedBarColor(color);
+        mUpdateOkButton.setBackground(DrawableUtil.getDrawable(AppUpdateUtils.dp2px(4, getActivity()), color));
+        mCancelBtn.setBackground(DrawableUtil.getDrawable(AppUpdateUtils.dp2px(4, getActivity()), color));
+        mPauseContinueBtn.setBackground(DrawableUtil.getDrawable(AppUpdateUtils.dp2px(4, getActivity()), color));
+        mNumberPb.setProgressTextColor(color);
+        mNumberPb.setReachedBarColor(color);
         //随背景颜色变化
         mUpdateOkButton.setTextColor(ColorUtil.isTextColorDark(color) ? Color.BLACK : Color.WHITE);
         mCancelBtn.setTextColor(ColorUtil.isTextColorDark(color) ? Color.BLACK : Color.WHITE);
@@ -257,7 +263,7 @@ public class UpdateDialogFragment extends DialogFragment implements View.OnClick
 
     private void initClickEvents() {
         mUpdateOkButton.setOnClickListener(this);
-        mIvClose.setOnClickListener(this);
+        mCloseIv.setOnClickListener(this);
         mIgnore.setOnClickListener(this);
         mCancelBtn.setOnClickListener(this);
         mPauseContinueBtn.setOnClickListener(this);
@@ -289,13 +295,13 @@ public class UpdateDialogFragment extends DialogFragment implements View.OnClick
                 if (mDownloadBinder.isPaused()) {
                     continueDownload();
                 } else {
-                   pauseDownload();
+                    pauseDownload();
                 }
             }
         } else if (i == R.id.iv_close) {
             dismiss();
         } else if (i == R.id.tv_ignore) {
-            AppUpdateUtils.saveIgnoreVersion(getActivity(), mAppBean.getNewVersion());
+            AppUpdateUtils.saveIgnoreVersion(getActivity(), mAppBean.getVersion());
             dismiss();
         }
     }
@@ -312,12 +318,12 @@ public class UpdateDialogFragment extends DialogFragment implements View.OnClick
             binder.start(mAppBean, new DownloadCallback() {
                 @Override
                 public void onStart() {
-                    if (mAppBean.isSilence()) {
+                    if (UpdateType.Slience == mAppBean.getType()) {
                         dismiss();
                     } else {
-                        if (UpdateDialogFragment.this.isShowing()) {
+                        if (RocketFragment.this.isShowing()) {
                             getDialog().setCancelable(false);
-                            mNumberProgressBar.setVisibility(View.VISIBLE);
+                            mNumberPb.setVisibility(View.VISIBLE);
                             mUpdateOkButton.setVisibility(View.GONE);
                             mLoadingLL.setVisibility(View.VISIBLE);
                         }
@@ -326,12 +332,12 @@ public class UpdateDialogFragment extends DialogFragment implements View.OnClick
 
                 @Override
                 public void onProgress(float progress, long totalSize) {
-                    if (!mAppBean.isSilence()) {
-                        if (UpdateDialogFragment.this.isShowing()) {
-                            mNumberProgressBar.setProgress(Math.round(progress * 100));
-                            mNumberProgressBar.setMax(100);
+                    if (UpdateType.Slience != mAppBean.getType()) {
+                        if (RocketFragment.this.isShowing()) {
+                            mNumberPb.setProgress(Math.round(progress * 100));
+                            mNumberPb.setMax(100);
                             if (apkTotalSize == 0 && totalSize > 0) {
-                                AppUpdateUtils.saveApkSize(Objects.requireNonNull(UpdateDialogFragment.this.getActivity()), totalSize);
+                                AppUpdateUtils.saveApkSize(Objects.requireNonNull(RocketFragment.this.getActivity()), totalSize);
                                 apkTotalSize = totalSize;
                             }
                         }
@@ -340,17 +346,17 @@ public class UpdateDialogFragment extends DialogFragment implements View.OnClick
 
                 @Override
                 public void onFinish(final File file) {
-                    if (mAppBean.isSilence()) {
+                    if (UpdateType.Slience == mAppBean.getType()) {
                         silenceUpdateCallback.onDownloadFinish(file);
                     } else {
-                        if (UpdateDialogFragment.this.isShowing()) {
+                        if (RocketFragment.this.isShowing()) {
                             getDialog().setCancelable(true);
                             mLoadingLL.setVisibility(View.GONE);
-                            if (mAppBean.isConstraint()) {
+                            if (UpdateType.Force == mAppBean.getType()) {
                                 showInstallBtn(file);
                             } else {
                                 dismiss();
-                                AppUpdateUtils.installApp(UpdateDialogFragment.this, file);
+                                AppUpdateUtils.installApp(RocketFragment.this, file);
                             }
                         }
                     }
@@ -359,7 +365,7 @@ public class UpdateDialogFragment extends DialogFragment implements View.OnClick
 
                 @Override
                 public void onError(String msg) {
-                    if (UpdateDialogFragment.this.isShowing()) {
+                    if (RocketFragment.this.isShowing()) {
                         getDialog().setCancelable(true);
                         cancelDownload();
                         cancelDownloadService();
@@ -376,7 +382,7 @@ public class UpdateDialogFragment extends DialogFragment implements View.OnClick
     private void pauseDownload() {
         if (mDownloadBinder != null) {
             mPauseContinueBtn.setText("继续");
-            mDownloadBinder.pause(mAppBean.getApkDownloadUrl());
+            mDownloadBinder.pause(mAppBean.getUrl());
         }
     }
 
@@ -386,7 +392,7 @@ public class UpdateDialogFragment extends DialogFragment implements View.OnClick
     private void continueDownload() {
         if (mDownloadBinder != null) {
             mPauseContinueBtn.setText("暂停");
-            mDownloadBinder.continued(mAppBean.getApkDownloadUrl());
+            mDownloadBinder.continued(mAppBean.getUrl());
         }
     }
 
@@ -395,7 +401,7 @@ public class UpdateDialogFragment extends DialogFragment implements View.OnClick
      */
     private void cancelDownload() {
         if (mDownloadBinder != null) {
-            mDownloadBinder.cancel(mAppBean.getApkDownloadUrl());
+            mDownloadBinder.cancel(mAppBean.getUrl());
         }
     }
 
@@ -411,7 +417,7 @@ public class UpdateDialogFragment extends DialogFragment implements View.OnClick
 
     private void installApp() {
         if (AppUpdateUtils.appIsDownloaded(Objects.requireNonNull(this.getActivity()), mAppBean)) {   //已下载完成
-            AppUpdateUtils.installApp(UpdateDialogFragment.this, AppUpdateUtils.getAppFile(mAppBean));
+            AppUpdateUtils.installApp(RocketFragment.this, AppUpdateUtils.getAppFile(mAppBean));
         } else {   //未下载
             mLlClose.setVisibility(View.GONE);
             downloadApp();
@@ -422,11 +428,11 @@ public class UpdateDialogFragment extends DialogFragment implements View.OnClick
      * 开启后台服务下载
      */
     private void downloadApp() {
-        if (TextUtils.isEmpty(mAppBean.getApkDownloadUrl())) {
+        if (TextUtils.isEmpty(mAppBean.getUrl())) {
             Toast.makeText(this.getActivity(), "下载路径错误", Toast.LENGTH_SHORT).show();
             return;
         }
-        File appDir = new File(mAppBean.getApkDownloadPath());
+        File appDir = new File(mAppBean.getPath());
         if (!appDir.exists()) {
             if (!appDir.mkdirs())
                 return;
@@ -452,13 +458,13 @@ public class UpdateDialogFragment extends DialogFragment implements View.OnClick
     }
 
     private void showInstallBtn(final File file) {
-        mNumberProgressBar.setVisibility(View.GONE);
+        mNumberPb.setVisibility(View.GONE);
         mUpdateOkButton.setText("安装");
         mUpdateOkButton.setVisibility(View.VISIBLE);
         mUpdateOkButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AppUpdateUtils.installApp(UpdateDialogFragment.this, file);
+                AppUpdateUtils.installApp(RocketFragment.this, file);
             }
         });
     }

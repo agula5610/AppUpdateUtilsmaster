@@ -1,4 +1,4 @@
-package com.luxiaochun.appupdateutils;
+package com.luxiaochun.appupdateutils.common;
 
 
 import android.support.v4.content.FileProvider;
