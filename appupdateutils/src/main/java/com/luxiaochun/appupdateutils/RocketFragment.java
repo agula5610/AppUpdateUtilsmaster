@@ -161,7 +161,6 @@ public class RocketFragment extends DialogFragment implements View.OnClickListen
         } else {
             downloadUtils = new RocketDownloadUtils(this,mAppBean);
         }
-
         //设置主题色
         initTheme();
         if (mAppBean != null) {
@@ -185,20 +184,16 @@ public class RocketFragment extends DialogFragment implements View.OnClickListen
             mContentTv.setText(msg);
             //标题
             mTitleTv.setText(TextUtils.isEmpty(title) ? String.format("是否升级到%s版本？", version) : title);
-            //强制更新
-            if (UpdateType.Force == mAppBean.getType()) {
-                mLlClose.setVisibility(View.GONE);
-                mCancelBtn.setVisibility(View.GONE);
-            }
-
-            if (UpdateType.Hint == mAppBean.getType()) {
-                mUpdateOkButton.setVisibility(View.GONE);
-            }
             // 判断是否已下载
             if (AppUpdateUtils.appIsDownloaded(Objects.requireNonNull(this.getActivity()), mAppBean)) {
                 showInstallBtn(AppUpdateUtils.getAppFile(mAppBean));
             }
-
+            if (UpdateType.Force == mAppBean.getType()) {
+                mLlClose.setVisibility(View.GONE);
+                mCancelBtn.setVisibility(View.GONE);
+            } else if (UpdateType.Hint == mAppBean.getType()) {
+                mUpdateOkButton.setVisibility(View.GONE);
+            }
             initClickEvents();
         }
     }
@@ -329,28 +324,6 @@ public class RocketFragment extends DialogFragment implements View.OnClickListen
             }
         });
     }
-
-
-//    @Override
-//    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-//        Log.e("", "对话框 requestCode = [" + requestCode + "], resultCode = [" + resultCode + "], data = [" + data + "]");
-//        switch (resultCode) {
-//            case Activity.RESULT_CANCELED:
-//                switch (requestCode){
-//                    // 得到通过UpdateDialogFragment默认dialog方式安装，用户取消安装的回调通知，以便用户自己去判断，比如这个更新如果是强制的，但是用户下载之后取消了，在这里发起相应的操作
-//                    case AppUpdateUtils.REQ_CODE_INSTALL_APP:
-//                        if (mAppBean.isConstraint()) {
-//                            if (AppUpdateUtils.appIsDownloaded(Objects.requireNonNull(this.getActivity()),mAppBean)) {
-//                                AppUpdateUtils.downloadApp(UpdateDialogFragment.this, AppUpdateUtils.getAppFile(mAppBean));
-//                            }
-//                        }
-//                        break;
-//                }
-//                break;
-//
-//            default:
-//        }
-//    }
 
     @Override
     public void onDestroyView() {

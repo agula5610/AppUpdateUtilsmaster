@@ -9,14 +9,17 @@ import android.text.TextUtils;
 
 import com.luxiaochun.appupdateutils.common.AppUpdateBean;
 import com.luxiaochun.appupdateutils.common.UpdateType;
+import com.luxiaochun.appupdateutils.downloadutils.SlienceDownloadUtils;
+import com.luxiaochun.appupdateutils.utils.AppUpdateUtils;
 
+import java.util.Objects;
 
 /**
  * 版本更新管理器
  */
 public class AppUpdateManager {
     public static final String TAG = AppUpdateManager.class.getSimpleName();
-    private static final long REFRESH_TIME = 200;  //毫秒
+    private static final long REFRESH_TIME = 300;  //毫秒
 
     private Context mContext;
     private AppUpdateBean bean;
@@ -44,11 +47,20 @@ public class AppUpdateManager {
 
 
     public void update() {
-        Bundle bundle = new Bundle();
-        bundle.putSerializable(TAG, bean);
-        RocketFragment fragment = RocketFragment
-                .newInstance(bundle);
-        fragment.show(((FragmentActivity) mContext).getSupportFragmentManager(), "");
+        if (UpdateType.Download == bean.getType()) {
+            SlienceDownloadUtils downloadUtils = new SlienceDownloadUtils(mContext, bean);
+            if (AppUpdateUtils.appIsDownloaded(Objects.requireNonNull(mContext), bean)) {
+                AppUpdateUtils.installApp(mContext, AppUpdateUtils.getAppFile(bean));
+            } else {
+                downloadUtils.download();
+            }
+        } else {
+            Bundle bundle = new Bundle();
+            bundle.putSerializable(TAG, bean);
+            RocketFragment fragment = RocketFragment
+                    .newInstance(bundle);
+            fragment.show(((FragmentActivity) mContext).getSupportFragmentManager(), "");
+        }
     }
 
     public static class Builder {

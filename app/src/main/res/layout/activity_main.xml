@@ -29,6 +29,18 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="强制更新" />
+
+        <Button
+            android:id="@+id/tink"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="提示" />
+
+        <Button
+            android:id="@+id/download"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="仅下载" />
     </LinearLayout>
 
 
