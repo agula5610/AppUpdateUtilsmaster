@@ -79,7 +79,7 @@ public class DownloadService extends Service {
         public void continued(String url) {
             if (httpManager != null) {
                 isPaused = false;
-                httpManager.continueDownload(url);
+                httpManager.continued(url);
             }
         }
 
@@ -118,64 +118,4 @@ public class DownloadService extends Service {
             return isPaused;
         }
     }
-
-//    class FileDownloadCallBack implements HttpManager.FileCallback {
-//        private final DownloadCallback mCallBack;
-//        AppUpdateBean updateApp;
-//
-//        public FileDownloadCallBack(AppUpdateBean updateApp, @Nullable DownloadCallback callback) {
-//            super();
-//            this.mCallBack = callback;
-//            this.updateApp = updateApp;
-//        }
-//
-//        @Override
-//        public void onBefore() {
-//            if (mCallBack != null) {
-//                mCallBack.onStart();
-//                if (UpdateType.Slience == updateApp.getType()) {
-//                    silenceNotificationManager = SilenceNotificationManager.getIstance(DownloadService.this);
-//                    silenceNotificationManager.setUpNotification();
-//                }
-//            }
-//        }
-//
-//        @Override
-//        public void onProgress(float progress, long total) {
-//            //设置一个刷新时间--RefreshTime，防止自回调过于频繁，造成更新通知栏进度过于频繁，而出现卡顿的问题。
-//            long lastTime = updateApp.getLastRefreshTime();
-//            if (updateApp.getRefreshTime() < SystemClock.elapsedRealtime() - lastTime) {
-//                if (mCallBack != null) {
-//                    if (UpdateType.Slience == updateApp.getType()) {
-//                        int rate = Math.round(progress * 100);
-//                        silenceNotificationManager.setProgress(rate);
-//                    } else {
-//                        mCallBack.onProgress(progress, total);
-//                    }
-//                }
-//                updateApp.setLastRefreshTime(SystemClock.elapsedRealtime());
-//            }
-//        }
-//
-//        @Override
-//        public void onError(String error) {
-//            Toast.makeText(DownloadService.this, "更新新版本出错，" + error, Toast.LENGTH_SHORT).show();
-//            if (mCallBack != null) {
-//                if (UpdateType.Slience == updateApp.getType()) {
-//                    silenceNotificationManager.errorStop(error);
-//                }
-//                mCallBack.onError(error);
-//            }
-//        }
-//
-//        @Override
-//        public void onResponse(File file) {
-//            if (mCallBack != null) {
-//                if (UpdateType.Slience == updateApp.getType()) {
-//                    silenceNotificationManager.setProgressDone(file);
-//                }
-//                mCallBack.onFinish(file);
-//            }
-//        }
-//    }
 }

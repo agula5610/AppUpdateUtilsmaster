@@ -34,7 +34,7 @@ public class OkGoUpdateHttpUtil implements HttpManager {
     }
 
     @Override
-    public void continueDownload(@NonNull String url) {
+    public void continued(@NonNull String url) {
         OkDownload.getInstance().getTask(url).start();
     }
 

@@ -24,7 +24,7 @@ public interface HttpManager extends Serializable {
      * 继续下载，断点续传
      * @param url
      */
-    void continueDownload(@NonNull String url);
+    void continued(@NonNull String url);
 
     /**
      * 暂停下载
