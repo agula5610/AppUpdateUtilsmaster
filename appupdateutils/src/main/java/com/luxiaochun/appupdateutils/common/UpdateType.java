@@ -14,8 +14,6 @@ public enum UpdateType {
     Slience,
     // 强制更新
     Force,
-    // 静默强制更新
-    SlienceFoce,
     // 仅下载(不显示升级信息)
     Download,
     // 只做提示，不做升级，可以关闭

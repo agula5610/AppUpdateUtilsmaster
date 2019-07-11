@@ -1,15 +1,15 @@
 package com.luxiaochun.appupdateutils.downloadService;
 
-/**
- * ProjectName: JiuZhou
- * PackageName: com.example.jun.jiuzhou.AppUpdateUtil.downloadService
- * Author: jun
- * Date: 2018-08-08 14:27
- */
-
 import java.io.File;
 
-public interface DownloadCallback {
+/**
+ * ProjectName: AppUpdateUtilsmaster
+ * PackageName: com.luxiaochun.appupdateutils.downloadService
+ * Author: jun
+ * Date: 2019-07-11 09:43
+ * Copyright: (C)HESC Co.,Ltd. 2016. All rights reserved.
+ */
+public interface Callback {
     /**
      * 开始
      */
@@ -37,6 +37,4 @@ public interface DownloadCallback {
      * @param msg 异常信息
      */
     void onError(String msg);
-
-
 }

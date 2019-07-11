@@ -1,14 +1,11 @@
 package com.luxiaochun.appupdateutils;
 
 import android.Manifest;
-import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
@@ -29,9 +26,9 @@ import android.widget.Toast;
 
 import com.luxiaochun.appupdateutils.common.AppUpdateBean;
 import com.luxiaochun.appupdateutils.common.UpdateType;
-import com.luxiaochun.appupdateutils.downloadService.DownloadCallback;
-import com.luxiaochun.appupdateutils.downloadService.DownloadService;
-import com.luxiaochun.appupdateutils.downloadService.SilenceUpdateCallback;
+import com.luxiaochun.appupdateutils.downloadutils.DownloadUtils;
+import com.luxiaochun.appupdateutils.downloadutils.RocketDownloadUtils;
+import com.luxiaochun.appupdateutils.downloadutils.SlienceDownloadUtils;
 import com.luxiaochun.appupdateutils.utils.AppUpdateUtils;
 import com.luxiaochun.appupdateutils.utils.ColorUtil;
 import com.luxiaochun.appupdateutils.utils.DrawableUtil;
@@ -62,23 +59,8 @@ public class RocketFragment extends DialogFragment implements View.OnClickListen
     private int mDefaultPicResId = R.drawable.lib_update_app_top_bg;
 
     private long apkTotalSize = 0;
-    private DownloadService.DownloadBinder mDownloadBinder;
-    private SilenceUpdateCallback silenceUpdateCallback;
 
-    /**
-     * 回调
-     */
-    private ServiceConnection conn = new ServiceConnection() {
-
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            startDownloadApp((DownloadService.DownloadBinder) service);
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-        }
-    };
+    private DownloadUtils downloadUtils;
 
     public static RocketFragment newInstance(Bundle args) {
         RocketFragment fragment = new RocketFragment();
@@ -159,10 +141,6 @@ public class RocketFragment extends DialogFragment implements View.OnClickListen
         });
     }
 
-    public void setSilenceUpdateCallback(SilenceUpdateCallback silenceUpdateCallback) {
-        this.silenceUpdateCallback = silenceUpdateCallback;
-    }
-
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
@@ -178,6 +156,12 @@ public class RocketFragment extends DialogFragment implements View.OnClickListen
 
     private void initData() {
         mAppBean = (AppUpdateBean) getArguments().getSerializable(AppUpdateManager.TAG);
+        if (UpdateType.Slience == mAppBean.getType()) {
+            downloadUtils = new SlienceDownloadUtils(this.getContext(),mAppBean);
+        } else {
+            downloadUtils = new RocketDownloadUtils(this,mAppBean);
+        }
+
         //设置主题色
         initTheme();
         if (mAppBean != null) {
@@ -284,20 +268,18 @@ public class RocketFragment extends DialogFragment implements View.OnClickListen
                     requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
                 }
             } else {
-                installApp();
+                downloadApp();
             }
         } else if (i == R.id.btn_cancel) {
-            cancelDownload();
-            cancelDownloadService();
+            downloadUtils.cancelDownload();
+            downloadUtils.cancelDownloadService();
             dismiss();
         } else if (i == R.id.btn_pause_continue) {
-            if (mDownloadBinder != null) {
-                if (mDownloadBinder.isPaused()) {
-                    continueDownload();
+                if (downloadUtils.isPaused()) {
+                    downloadUtils.continueDownload();
                 } else {
-                    pauseDownload();
+                    downloadUtils.pauseDownload();
                 }
-            }
         } else if (i == R.id.iv_close) {
             dismiss();
         } else if (i == R.id.tv_ignore) {
@@ -306,140 +288,19 @@ public class RocketFragment extends DialogFragment implements View.OnClickListen
         }
     }
 
-    /**
-     * 回调监听下载
-     *
-     * @param binder
-     */
-    private void startDownloadApp(DownloadService.DownloadBinder binder) {
-        // 开始下载，监听下载进度，可以用对话框显示
-        if (mAppBean != null) {
-            this.mDownloadBinder = binder;
-            binder.start(mAppBean, new DownloadCallback() {
-                @Override
-                public void onStart() {
-                    if (UpdateType.Slience == mAppBean.getType()) {
-                        dismiss();
-                    } else {
-                        if (RocketFragment.this.isShowing()) {
-                            getDialog().setCancelable(false);
-                            mNumberPb.setVisibility(View.VISIBLE);
-                            mUpdateOkButton.setVisibility(View.GONE);
-                            mLoadingLL.setVisibility(View.VISIBLE);
-                        }
-                    }
-                }
-
-                @Override
-                public void onProgress(float progress, long totalSize) {
-                    if (UpdateType.Slience != mAppBean.getType()) {
-                        if (RocketFragment.this.isShowing()) {
-                            mNumberPb.setProgress(Math.round(progress * 100));
-                            mNumberPb.setMax(100);
-                            if (apkTotalSize == 0 && totalSize > 0) {
-                                AppUpdateUtils.saveApkSize(Objects.requireNonNull(RocketFragment.this.getActivity()), totalSize);
-                                apkTotalSize = totalSize;
-                            }
-                        }
-                    }
-                }
-
-                @Override
-                public void onFinish(final File file) {
-                    if (UpdateType.Slience == mAppBean.getType()) {
-                        silenceUpdateCallback.onDownloadFinish(file);
-                    } else {
-                        if (RocketFragment.this.isShowing()) {
-                            getDialog().setCancelable(true);
-                            mLoadingLL.setVisibility(View.GONE);
-                            if (UpdateType.Force == mAppBean.getType()) {
-                                showInstallBtn(file);
-                            } else {
-                                dismiss();
-                                AppUpdateUtils.installApp(RocketFragment.this, file);
-                            }
-                        }
-                    }
-                    cancelDownloadService();
-                }
-
-                @Override
-                public void onError(String msg) {
-                    if (RocketFragment.this.isShowing()) {
-                        getDialog().setCancelable(true);
-                        cancelDownload();
-                        cancelDownloadService();
-                        dismissAllowingStateLoss();
-                    }
-                }
-            });
-        }
-    }
-
-    /**
-     * 暂停下载
-     */
-    private void pauseDownload() {
-        if (mDownloadBinder != null) {
-            mPauseContinueBtn.setText("继续");
-            mDownloadBinder.pause(mAppBean.getUrl());
-        }
-    }
-
-    /**
-     * 继续下载
-     */
-    private void continueDownload() {
-        if (mDownloadBinder != null) {
-            mPauseContinueBtn.setText("暂停");
-            mDownloadBinder.continued(mAppBean.getUrl());
-        }
-    }
-
-    /**
-     * 取消下载
-     */
-    private void cancelDownload() {
-        if (mDownloadBinder != null) {
-            mDownloadBinder.cancel(mAppBean.getUrl());
-        }
-    }
-
-    /**
-     * 停止后台运行的服务进程
-     */
-    public void cancelDownloadService() {
-        if (mDownloadBinder != null) {
-            mDownloadBinder.stop(conn);
-        }
-    }
-
-
-    private void installApp() {
+    private void downloadApp() {
         if (AppUpdateUtils.appIsDownloaded(Objects.requireNonNull(this.getActivity()), mAppBean)) {   //已下载完成
             AppUpdateUtils.installApp(RocketFragment.this, AppUpdateUtils.getAppFile(mAppBean));
         } else {   //未下载
             mLlClose.setVisibility(View.GONE);
-            downloadApp();
+            if (UpdateType.Slience == mAppBean.getType()) {
+                dismiss();
+            }
+            downloadUtils.download();
         }
     }
 
-    /**
-     * 开启后台服务下载
-     */
-    private void downloadApp() {
-        if (TextUtils.isEmpty(mAppBean.getUrl())) {
-            Toast.makeText(this.getActivity(), "下载路径错误", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        File appDir = new File(mAppBean.getPath());
-        if (!appDir.exists()) {
-            if (!appDir.mkdirs())
-                return;
-        }
-        //apk所在地址：指定地址+版本号+apkName
-        DownloadService.bindService(getActivity().getApplicationContext(), conn);
-    }
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
@@ -447,7 +308,7 @@ public class RocketFragment extends DialogFragment implements View.OnClickListen
         if (requestCode == 1) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 //升级
-                installApp();
+                downloadApp();
             } else {
                 //提示，并且关闭
                 Toast.makeText(getActivity(), TIPS, Toast.LENGTH_LONG).show();
@@ -480,7 +341,7 @@ public class RocketFragment extends DialogFragment implements View.OnClickListen
 //                    case AppUpdateUtils.REQ_CODE_INSTALL_APP:
 //                        if (mAppBean.isConstraint()) {
 //                            if (AppUpdateUtils.appIsDownloaded(Objects.requireNonNull(this.getActivity()),mAppBean)) {
-//                                AppUpdateUtils.installApp(UpdateDialogFragment.this, AppUpdateUtils.getAppFile(mAppBean));
+//                                AppUpdateUtils.downloadApp(UpdateDialogFragment.this, AppUpdateUtils.getAppFile(mAppBean));
 //                            }
 //                        }
 //                        break;
@@ -498,6 +359,54 @@ public class RocketFragment extends DialogFragment implements View.OnClickListen
 
     public boolean isShowing() {
         return getDialog() != null && getDialog().isShowing();
+    }
+
+    public void onRocketStart() {
+        if (isShowing()) {
+            getDialog().setCancelable(false);
+            mNumberPb.setVisibility(View.VISIBLE);
+            mUpdateOkButton.setVisibility(View.GONE);
+            mLoadingLL.setVisibility(View.VISIBLE);
+        }
+    }
+
+    public void onRocketProgress(float progress, long totalSize) {
+        if (isShowing()) {
+            mNumberPb.setProgress(Math.round(progress * 100));
+            mNumberPb.setMax(100);
+            if (apkTotalSize == 0 && totalSize > 0) {
+                AppUpdateUtils.saveApkSize(Objects.requireNonNull(RocketFragment.this.getActivity()), totalSize);
+                apkTotalSize = totalSize;
+            }
+        }
+    }
+
+    public void onRocketFinish(File file) {
+        if (isShowing()) {
+            getDialog().setCancelable(true);
+            mLoadingLL.setVisibility(View.GONE);
+            if (UpdateType.Force == mAppBean.getType()) {
+                showInstallBtn(file);
+            } else {
+                dismiss();
+            }
+            AppUpdateUtils.installApp(RocketFragment.this, file);
+        }
+    }
+
+    public void onRocketError(String msg) {
+        if (isShowing()) {
+            getDialog().setCancelable(true);
+            dismissAllowingStateLoss();
+        }
+    }
+
+    public void onRocketPause() {
+        mPauseContinueBtn.setText("继续");
+    }
+
+    public void onRocketContinue() {
+        mPauseContinueBtn.setText("暂停");
     }
 }
 

@@ -9,10 +9,6 @@ import android.text.TextUtils;
 
 import com.luxiaochun.appupdateutils.common.AppUpdateBean;
 import com.luxiaochun.appupdateutils.common.UpdateType;
-import com.luxiaochun.appupdateutils.downloadService.SilenceUpdateCallback;
-import com.luxiaochun.appupdateutils.utils.AppUpdateUtils;
-
-import java.io.File;
 
 
 /**
@@ -20,7 +16,7 @@ import java.io.File;
  */
 public class AppUpdateManager {
     public static final String TAG = AppUpdateManager.class.getSimpleName();
-    private static final long REFRESH_TIME = 150;  //毫秒
+    private static final long REFRESH_TIME = 200;  //毫秒
 
     private Context mContext;
     private AppUpdateBean bean;
@@ -39,6 +35,7 @@ public class AppUpdateManager {
         bean.setTitle(builder.getTitle());
         bean.setThemeColor(builder.getThemeColor());
         bean.setTopPic(builder.getTopPic());
+        bean.setRefreshTime(builder.getRefreshTime());
 
         bean.setWifi(builder.isWifi());
 
@@ -51,18 +48,6 @@ public class AppUpdateManager {
         bundle.putSerializable(TAG, bean);
         RocketFragment fragment = RocketFragment
                 .newInstance(bundle);
-        if (UpdateType.Slience == bean.getType()) {
-            fragment.setSilenceUpdateCallback(new SilenceUpdateCallback() {
-                @Override
-                public void onDownloadFinish(File file) {
-                    if (mContext != null) {
-                        if (AppUpdateUtils.isAppOnForeground(mContext)) {
-                            AppUpdateUtils.installApp(mContext, file);
-                        }
-                    }
-                }
-            });
-        }
         fragment.show(((FragmentActivity) mContext).getSupportFragmentManager(), "");
     }
 
@@ -88,7 +73,7 @@ public class AppUpdateManager {
 
         private boolean wifi;
 
-        private UpdateType type;
+        private UpdateType type = UpdateType.Normal;
 
         /**
          * @param type 更新模式
