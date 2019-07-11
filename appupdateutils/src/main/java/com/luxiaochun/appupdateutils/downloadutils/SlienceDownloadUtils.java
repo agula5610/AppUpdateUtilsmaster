@@ -71,12 +71,10 @@ public class SlienceDownloadUtils extends DownloadUtils {
                     cancelDownload();
                     cancelDownloadService();
                     if (silenceNotificationManager != null) {
-                        silenceNotificationManager.setProgressDone(file);
+                        silenceNotificationManager.cancel();
                     }
-                    if (AppUpdateUtils.isAppOnForeground(context)) {
+                    if (context != null) {
                         AppUpdateUtils.installApp(context, file);
-                    } else {
-
                     }
                 }
 

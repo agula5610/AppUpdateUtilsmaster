@@ -118,21 +118,7 @@ public class AppUpdateUtils {
         return null;
     }
 
-    public static String getVersionName(Context context) {
-        PackageInfo packageInfo = getPackageInfo(context);
-        if (packageInfo != null) {
-            return packageInfo.versionName;
-        }
-        return "";
-    }
 
-    public static int getVersionCode(Context context) {
-        PackageInfo packageInfo = getPackageInfo(context);
-        if (packageInfo != null) {
-            return packageInfo.versionCode;
-        }
-        return 0;
-    }
 
     public static PackageInfo getPackageInfo(Context context) {
         try {

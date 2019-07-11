@@ -3,7 +3,9 @@ package com.luxiaochun.appupdateutils.downloadService;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.support.v4.app.NotificationCompat;
 
 import com.luxiaochun.appupdateutils.R;
@@ -89,12 +91,13 @@ public class SilenceNotificationManager {
 
     public void setProgressDone(File file){
         if (mBuilder != null) {
-//            Intent installAppIntent = AppUpdateUtils.getInstallAppIntent(mContext, file);
-//            PendingIntent contentIntent = PendingIntent.getActivity(mContext, 0, installAppIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+            Intent installAppIntent = AppUpdateUtils.getInstallAppIntent(mContext, file);
+            PendingIntent contentIntent = PendingIntent.getActivity(mContext, 0, installAppIntent, PendingIntent.FLAG_UPDATE_CURRENT);
             mBuilder.setContentTitle(AppUpdateUtils.getAppName(mContext))
                     .setContentText("下载完成。")
                     .setProgress(0, 0, false)
                     //                        .setAutoCancel(true)
+                    .setContentIntent(contentIntent)
                     .setDefaults((Notification.DEFAULT_ALL));
             Notification notification = mBuilder.build();
             notification.flags = Notification.FLAG_AUTO_CANCEL;
