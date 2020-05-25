@@ -1,1 +1,1 @@
-include ':app', ':appupdateutils'
+include ':app', ':app_update_rocket'

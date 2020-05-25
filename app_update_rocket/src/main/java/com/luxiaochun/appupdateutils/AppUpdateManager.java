@@ -11,7 +11,6 @@ import com.luxiaochun.appupdateutils.common.AppUpdateBean;
 import com.luxiaochun.appupdateutils.common.UpdateType;
 import com.luxiaochun.appupdateutils.downloadutils.SlienceDownloadUtils;
 import com.luxiaochun.appupdateutils.utils.AppUpdateUtils;
-import com.luxiaochun.appupdateutils.view.RocketFragment;
 
 import java.util.Objects;
 

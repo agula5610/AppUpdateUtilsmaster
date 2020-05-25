@@ -4,7 +4,7 @@ package com.luxiaochun.appupdateutils.downloadutils;
 import android.text.TextUtils;
 import android.widget.Toast;
 
-import com.luxiaochun.appupdateutils.view.RocketFragment;
+import com.luxiaochun.appupdateutils.RocketFragment;
 import com.luxiaochun.appupdateutils.common.AppUpdateBean;
 import com.luxiaochun.appupdateutils.downloadService.Callback;
 import com.luxiaochun.appupdateutils.downloadService.DownloadService;

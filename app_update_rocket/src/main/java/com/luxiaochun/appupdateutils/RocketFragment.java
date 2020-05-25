@@ -1,4 +1,4 @@
-package com.luxiaochun.appupdateutils.view;
+package com.luxiaochun.appupdateutils;
 
 import android.Manifest;
 import android.content.DialogInterface;
@@ -24,8 +24,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.luxiaochun.appupdateutils.AppUpdateManager;
-import com.luxiaochun.appupdateutils.R;
 import com.luxiaochun.appupdateutils.common.AppUpdateBean;
 import com.luxiaochun.appupdateutils.common.UpdateType;
 import com.luxiaochun.appupdateutils.downloadutils.DownloadUtils;
@@ -34,6 +32,7 @@ import com.luxiaochun.appupdateutils.downloadutils.SlienceDownloadUtils;
 import com.luxiaochun.appupdateutils.utils.AppUpdateUtils;
 import com.luxiaochun.appupdateutils.utils.ColorUtil;
 import com.luxiaochun.appupdateutils.utils.DrawableUtil;
+import com.luxiaochun.appupdateutils.view.NumberProgressBar;
 
 import java.io.File;
 import java.util.Objects;
@@ -149,8 +148,8 @@ public class RocketFragment extends DialogFragment implements View.OnClickListen
         dialogWindow.setGravity(Gravity.CENTER);
         WindowManager.LayoutParams lp = dialogWindow.getAttributes();
         DisplayMetrics displayMetrics = getContext().getResources().getDisplayMetrics();
-        lp.height = (int) (displayMetrics.heightPixels * 0.6f);
-        lp.width = (int) (displayMetrics.widthPixels * 0.76f);
+        lp.height = (int) (displayMetrics.heightPixels * 0.70f);
+        lp.width = (int) (displayMetrics.widthPixels * 0.72f);
         dialogWindow.setAttributes(lp);
         initData();
     }

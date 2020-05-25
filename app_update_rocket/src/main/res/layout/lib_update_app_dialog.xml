@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/lib_update_app_info_bg"
     android:gravity="center"
     android:orientation="vertical">
 
@@ -23,7 +24,7 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:background="@drawable/lib_update_app_info_bg"
+            android:background="@android:color/white"
             android:orientation="vertical"
             android:padding="16dp">
 
@@ -127,9 +128,9 @@
 
             <View
                 android:id="@+id/line"
-                android:layout_width="1dp"
+                android:layout_width="1.2dp"
                 android:layout_height="50dp"
-                android:background="#d8d8d8"
+                android:background="@android:color/white"
                 android:visibility="visible" />
 
             <ImageView
