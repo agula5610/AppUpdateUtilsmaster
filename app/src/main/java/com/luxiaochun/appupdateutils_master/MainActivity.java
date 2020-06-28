@@ -29,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 new AppUpdateManager
                         .Builder()
+                        .setThemeColor(0xff16a9ff)
                         .setContext(MainActivity.this)
                         .setUrl("http://gdown.baidu.com/data/wisegame/e8235a956b670f0e/baiduwangpan_610.apk")
                         .setVersion("1.0")
